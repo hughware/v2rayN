@@ -71,6 +71,22 @@ public partial class CoreConfigSingboxService
                 {
                     tunInbound.address = ["172.18.0.1/30"];
                 }
+                if (context.IsMacOS && tunInbound.auto_route == true)
+                {
+                    var privateDnsRoutes = GetPrivateDnsRouteAddresses();
+                    if (privateDnsRoutes.Count > 0)
+                    {
+                        tunInbound.route_address =
+                        [
+                            "0.0.0.0/1",
+                            "128.0.0.0/1",
+                            .. _config.TunModeItem.EnableIPv6Address
+                                ? ["::/1", "8000::/1"]
+                                : Array.Empty<string>(),
+                            .. privateDnsRoutes,
+                        ];
+                    }
+                }
                 tunInbound.route_exclude_address = _config.TunModeItem.RouteExcludeAddress;
 
                 _coreConfig.inbounds.Add(tunInbound);
@@ -79,6 +95,26 @@ public partial class CoreConfigSingboxService
         catch (Exception ex)
         {
             Logging.SaveLog(_tag, ex);
+        }
+    }
+
+    private static List<string> GetPrivateDnsRouteAddresses()
+    {
+        try
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                .SelectMany(nic => nic.GetIPProperties().DnsAddresses)
+                .Where(ip => ip.AddressFamily == AddressFamily.InterNetwork
+                    && !IPAddress.IsLoopback(ip)
+                    && Utils.IsPrivateNetwork(ip.ToString()))
+                .Select(ip => $"{ip}/32")
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+            return [];
         }
     }
 
