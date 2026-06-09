@@ -111,7 +111,6 @@ public class Inbound4Sbox
     public bool? endpoint_independent_nat { get; set; }
     public string? stack { get; set; }
     public List<User4Sbox> users { get; set; }
-    public List<string>? route_address { get; set; }
     public List<string>? route_exclude_address { get; set; }
 }
 
