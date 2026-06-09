@@ -66,6 +66,7 @@ public partial class CoreConfigSingboxService
                 tunInbound.mtu = _config.TunModeItem.Mtu;
                 tunInbound.auto_route = _config.TunModeItem.AutoRoute;
                 tunInbound.strict_route = _config.TunModeItem.StrictRoute;
+                tunInbound.dns_mode = context.IsMacOS ? "hijack" : null;
                 tunInbound.stack = _config.TunModeItem.Stack;
                 if (_config.TunModeItem.EnableIPv6Address == false)
                 {

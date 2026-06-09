@@ -108,6 +108,7 @@ public class Inbound4Sbox
     public int? mtu { get; set; }
     public bool? auto_route { get; set; }
     public bool? strict_route { get; set; }
+    public string? dns_mode { get; set; }
     public bool? endpoint_independent_nat { get; set; }
     public string? stack { get; set; }
     public List<User4Sbox> users { get; set; }

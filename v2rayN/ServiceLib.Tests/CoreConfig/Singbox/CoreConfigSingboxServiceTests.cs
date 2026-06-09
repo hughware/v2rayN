@@ -55,6 +55,25 @@ public class CoreConfigSingboxServiceTests
     }
 
     [Fact]
+    public void GenerateClientConfigContent_MacOSTun_ShouldEnableDnsHijackMode()
+    {
+        var config = CoreConfigTestFactory.CreateConfig(ECoreType.sing_box);
+        CoreConfigTestFactory.BindAppManagerConfig(config);
+        var node = CoreConfigTestFactory.CreateSocksNode(ECoreType.sing_box);
+        var context = CoreConfigTestFactory.CreateContext(config, node, ECoreType.sing_box) with
+        {
+            IsTunEnabled = true,
+            IsMacOS = true,
+        };
+
+        var result = new CoreConfigSingboxService(context).GenerateClientConfigContent();
+
+        result.Success.Should().BeTrue($"ret msg: {result.Msg}");
+        var cfg = JsonUtils.Deserialize<SingboxConfig>(result.Data!.ToString())!;
+        cfg.inbounds.Single(i => i.type == "tun").dns_mode.Should().Be("hijack");
+    }
+
+    [Fact]
     public void GenerateClientConfigContent_BindInterface_ShouldUseDialBindInterface()
     {
         var config = CoreConfigTestFactory.CreateConfig(ECoreType.sing_box);
